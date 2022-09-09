@@ -1,0 +1,221 @@
+﻿@page "/GoodReceive/{InventoryID}"
+@using ACS.Data
+@using ACS.Helpers
+@using ACS.ViewModels
+
+
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="bill-heading">
+            <h2>Good Receive</h2>
+            <hr />
+        </div>
+    </div>
+
+</div>
+@if (loadCounter > 0)
+{
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>GR No </label>
+                <input type="text" class="form-control" placeholder="@inventory.GRNo" disabled>
+                <div class="help-block with-errors"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Recieved Date *</label>
+                <input type="date" class="form-control" id="Inward Date" name="dob" placeholder="Inward Date" @bind=inventory.ReceivedDate />
+                <div class="help-block with-errors"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Part Name *</label>
+                <RadzenDropDown AllowClear="true" TValue="int" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true" Class="w-100 selectpicker form-control"
+                            @bind-Value=inventory.PartyID Placeholder="Party Name" Data=@parties TextProperty="PartyName" ValueProperty="PartyID" />
+                @*   <select name="type" class="selectpicker form-control" data-style="py-0">
+                    </select>            *@
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Marka *</label>
+                <input type="text" class="form-control" placeholder="Marka Number" data-errors="Please Marka Number." required @bind=inventory.MarkOn>
+                <div class="help-block with-errors"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Article Number *</label>
+                <input type="text" class="form-control" placeholder="Article Number" data-errors="Please Article Number." required @bind=inventory.ArticleNo>
+                <div class="help-block with-errors"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Room Number *</label>
+                <input type="text" class="form-control" placeholder="Room Number" data-errors="Please Room Number." required @bind=inventory.RoomNo>
+                <div class="help-block with-errors"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+
+            <div class="form-group">
+                <label>Rack No *</label>
+                <input type="text" class="form-control" placeholder="Rack Number" data-errors="Please Rack No." required @bind=inventory.RackNo>
+                <div class="help-block with-errors"></div>
+            </div>
+
+        </div>
+
+        <div class="col-md-6">
+
+            <div class="form-group">
+                <label>StockIn Quantity *</label>
+                <input type="text" class="form-control" placeholder="StockIn Quantity" data-errors="Please StockIn Quantity" required @bind=inventory.StockInQty>
+                <div class="help-block with-errors"></div>
+            </div>
+
+        </div>
+
+        <div class="col-md-6">
+
+            <div class="form-group">
+                <label>Discount</label>
+                <input type="text" class="form-control" placeholder="Discount" data-errors="Please Discount." required @bind=inventory.Discount>
+                <div class="help-block with-errors"></div>
+            </div>
+
+        </div>
+
+        <div class="col-md-6">
+
+            <div class="form-group">
+                <label>Discount Days</label>
+                <input type="text" class="form-control" placeholder="Discount Days" data-errors="Please Discount Days." required @bind=inventory.DiscountDays>
+                <div class="help-block with-errors"></div>
+            </div>
+
+        </div>
+
+        <div class="col-md-6">
+
+            <div class="form-group">
+                <label>Item</label>
+                <RadzenDropDown AllowClear="true" TValue="int" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true" Class="w-100"
+                            @bind-Value=inventory.ItemID Placeholder="Received" Data=@items TextProperty="ItemName" ValueProperty="ItemID" />
+                <div class="help-block with-errors"></div>
+            </div>
+
+        </div>
+
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Size</label>
+                <RadzenDropDown AllowClear="true" TValue="int" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true" Class="w-100"
+                             @bind-Value=inventory.SizeID   Placeholder="Size" Data=@sizes TextProperty="Name" ValueProperty="SizeID"  />
+                <div class="help-block with-errors"></div>
+            </div>
+
+        </div>
+
+        <div class="col-md-6">
+
+            <div class="form-group">
+                <label>Monthly Rent</label>
+                <input type="text" class="form-control" placeholder="Monthly Rent" data-errors="Please Monthly Rent." required @bind=inventory.MonthlyRent>
+                <div class="help-block with-errors"></div>
+            </div>
+
+        </div>
+
+        <div class="col-md-6">
+
+            <div class="form-group">
+                <label>Customer Name</label>
+                <input type="text" class="form-control" placeholder="Customer Name" data-errors="Please Customer Name." required @bind=inventory.CustomerName>
+                <div class="help-block with-errors"></div>
+            </div>
+
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-right">
+            <RadzenButton Click="@CreateInventory" Text="Save" Style="width: 120px" ButtonStyle="ButtonStyle.Secondary" />
+            <RadzenButton Click="@((args) => dialogService.Close(null))" ButtonStyle="ButtonStyle.Danger" Text="Cancel" Style="width: 120px" Class="mr-1" />
+        </div>
+    </div>
+}
+
+@inject Radzen.DialogService dialogService
+@inject GoodsReceivedService _service
+@inject NotificationHelper NotifyHelper
+
+@code {
+    [Parameter] public string InventoryID { get; set; }
+
+    private List<ItemView> items;
+    private List<PartyView> parties;
+    private List<SizeView> sizes;
+    private ItemView item = new ItemView(); 
+    private int loadCounter = 0;
+
+    protected override Task OnInitializedAsync()
+    {
+      //  inventory.GRNo = _service.getNewGRNo();
+        parties = _service.getParties();
+        sizes = _service.getSizes();
+        items = _service.getItems();
+        loadCounter++;
+        return base.OnInitializedAsync();
+    }
+
+ 
+    protected override void OnInitialized()
+    {
+        if (InventoryID != "0")
+        {
+            inventory = _service.GetById(Convert.ToInt32(InventoryID));
+
+            if (inventory == null)
+            {
+                // Error Message
+            }
+
+        }
+    }
+
+
+    private InventoryView inventory = new InventoryView() { ReceivedDate = DateTime.UtcNow.AddHours(5) };
+    async Task CreateInventory()
+    {
+        try
+        {
+            if (InventoryID != "0")
+            {
+                inventory = await _service.UpdateGoodsReceived(inventory);
+            }
+           
+
+            if (inventory.InventoryID != 0)
+            {
+                NotifyHelper.Message(NotificationSeverity.Success, "Good Recieved", "Good Recieved Successfully Saved.");
+                dialogService.Close(inventory);
+            }
+            else
+            {
+                NotifyHelper.Message(NotificationSeverity.Error, "Good Recieved", "Error While Saving Record.");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotifyHelper.Message(NotificationSeverity.Error, "Employee", "Error While Saving Employee.");
+        }
+
+    }
+}

@@ -1,0 +1,119 @@
+﻿@page "/AdvanceSalary/{AdvanceSalaryID}"
+@using ACS.Data
+@using ACS.Helpers
+@using ACS.ViewModels
+
+
+
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="bill-heading">
+            <h2>@_Title</h2>
+            <hr />
+        </div>
+    </div>
+
+</div>
+<div class="row">
+    <div class="col-md-6">
+
+        <div class="form-group">
+             <label>Employee *</label>
+            <RadzenDropDown AllowClear="true" TValue="int" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true" Class="w-100"
+                              @bind-Value=Model.EmployeeID Placeholder="Employee Name" Data=@employees TextProperty="EmployeeName" ValueProperty="EmployeeID" />
+            <div class="help-block with-errors"></div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label>Advance Salary *</label>
+            <input type="text" class="form-control" placeholder="Description" data-errors="Please Enter Advance Salary." required @bind-value=Model.AdvSalary>
+            <div class="help-block with-errors"></div>
+        </div>
+
+    </div>
+  
+</div>
+<div class="row">
+
+    <div class="col-md-6">
+        <div class="form-group">
+            <label>Date *</label>
+            <input type="date" class="form-control" data-errors="Please Enter Date." required @bind-value=Model.Date>
+            <div class="help-block with-errors"></div>
+        </div>
+
+    </div>
+  
+</div>
+<div class="row">
+    <div class="col-md-12 text-right">
+        <RadzenButton Click="@Create" Text="Save" Style="width: 120px" ButtonStyle="ButtonStyle.Secondary" />
+        <RadzenButton Click="@((args) => dialogService.Close(null))" ButtonStyle="ButtonStyle.Danger" Text="Cancel" Style="width: 120px" Class="mr-1" />
+    </div>
+</div>
+
+
+@inject AdvanceSalaryManagerService _service;
+
+@inject Radzen.DialogService dialogService
+@inject NotificationHelper NotifyHelper
+
+@code {
+    private string _Title = "AdvanceSalary";
+
+    [Parameter] public string AdvanceSalaryID { get; set; }
+
+    private List<EmployeeView> employees;
+    private AdvanceSalaryView Model = new AdvanceSalaryView();
+
+    protected override void OnInitialized()
+    {
+        employees = _service.GetAllEmployees();
+        
+        if (AdvanceSalaryID != "0")
+        {
+            Model = _service.GetById(Convert.ToInt32(AdvanceSalaryID));
+
+            if (Model == null)
+            {
+                // Error Message
+            }
+
+        }
+       
+    }
+
+
+    async Task Create()
+    {
+        try
+        {
+            if (AdvanceSalaryID != "0")
+            {
+                Model = await _service.UpdateAdvanceSalary(Model);
+            }
+            else
+            {
+                Model = await _service.AddAdvanceSalary(Model);
+            }
+
+            if (Model.AdvanceSalaryID != 0)
+            {
+                NotifyHelper.Message(NotificationSeverity.Success, _Title, $"{_Title} Successfully Added .");
+                dialogService.Close(Model);
+            }
+            else
+            {
+                NotifyHelper.Message(NotificationSeverity.Error, _Title, $"Error While Saving {_Title}.");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotifyHelper.Message(NotificationSeverity.Error, _Title, $"Error While Saving {_Title}.");
+        }
+
+    }
+}
+

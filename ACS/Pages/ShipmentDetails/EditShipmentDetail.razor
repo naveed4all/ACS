@@ -1,0 +1,74 @@
+﻿@page "/EditShipmentDetail/{Id}"
+@using ACS.Data
+@using Radzen
+@using ACS.ViewModels
+@inject ShipmentDetailsManagerService _service
+@inject NavigationManager _navMan
+<section class="shipment_details">
+    <div class="container mt-4">
+        <div class="row shipment_input">
+            <div class="col-md-10 col-sm-10 col-xs-12 mb-4">
+            <div class="bill-heading">
+              <h2>Edit Shipment Details</h2>
+            </div>
+          </div>
+
+
+          <input type="hidden" @bind-value="shipmentDetail.ShipmentDetailsID" />
+
+
+            <div class="col-md-3">
+                <input type="text" class="form-control" placeholder="Shipment No" @bind-value=shipmentDetail.ShipmentNo/>
+            </div>
+            <div class="col-md-3">
+            <input type="text" class="form-control" placeholder="Shipline" @bind-value=shipmentDetail.Shipline/>
+            </div>
+            <div class="col-md-3">
+            <input type="text" class="form-control" placeholder="Vehicle Number" @bind-value=shipmentDetail.VehicleNo/>
+            </div>
+            <div class="col-md-3">
+            <input type="text" class="form-control" placeholder="Destination" @bind-value=shipmentDetail.Destination/>
+            </div>
+            </div>
+            <div class="row shipment_input">
+            <div class="col-md-3">
+              <RadzenDropDown AllowClear="true" TValue="int" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true" Class="w-100"
+                              @bind-Value=shipmentDetail.PartyID Placeholder="Party Name" Data=@parties TextProperty="PartyName" ValueProperty="PartyID" />
+             </div> 
+            <div class="col-md-3">
+                <input type="text" class="form-control inp_amnt" placeholder="Amount" @bind-value=shipmentDetail.Amount/>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control inp_amnt_rec" placeholder="Amount Received" @bind-value=shipmentDetail.AmountReceived/>
+            </div>
+            
+             <div style="display: flex;width: auto;justify-content: flex-end;"><button class="btn btn-primary emp_btn" @onclick="UpdateShipmentDetail">Save</button></div>
+           
+        </div>
+       
+      </div>
+</section>
+
+
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+    private ShipmentDetailsView shipmentDetail { get; set; }
+    private PartyView party { get; set; }
+    private List<ShipmentDetailsView> shipmentDetails;
+    private List<PartyView> parties;
+
+    protected override Task OnInitializedAsync()
+    {
+        shipmentDetail = _service.GetById(int.Parse(Id));
+        parties = _service.GetAllParties();
+        return base.OnInitializedAsync();
+    }
+
+    async Task UpdateShipmentDetail()
+    {
+        shipmentDetail =await _service.UpdateShipmentDetail(shipmentDetail);
+        _navMan.NavigateTo("/ShipmentDetails");
+    }
+}

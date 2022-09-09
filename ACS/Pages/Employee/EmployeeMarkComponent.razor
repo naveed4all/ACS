@@ -1,0 +1,128 @@
+﻿@page "/EmployeeMark/{EmployeeAttendenceID}"
+@using ACS.Data
+@using ACS.Helpers
+@using ACS.ViewModels
+
+@using Radzen
+
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="bill-heading">
+            <h2>Employee Mark Attendacne</h2>
+            <hr />
+        </div>
+    </div>
+</div>
+<div class="card-body">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Employee </label>
+                <RadzenDropDown AllowClear="true" TValue="int" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true" Class="w-100"
+                                @bind-Value=employeeAttendence.EmployeeID Placeholder="Select..." Data=@employees TextProperty="EmployeeName" ValueProperty="EmployeeID" />
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Check In</label>
+                <RadzenDatePicker @bind-Value=employeeAttendence.CheckIn TValue="DateTime?" ShowTime="true" HourFormat="12" DateFormat="MM/dd/yyyy h:mm tt" Class="w-100" />
+            </div>
+        </div>
+        @if (employeeAttendence.CheckIn != null)
+        {
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Check Out</label>
+                    <RadzenDatePicker @bind-Value=employeeAttendence.CheckOut TValue="DateTime?" ShowTime="true" HourFormat="12" DateFormat="MM/dd/yyyy h:mm tt" Class="w-100" />
+                </div>
+            </div>
+        }
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-right">
+            <RadzenButton Click="@CreateEmployeeAttendance" Text="Save" Style="width: 120px" ButtonStyle="ButtonStyle.Secondary" />
+            <RadzenButton Click="@((args) => dialogService.Close(null))" ButtonStyle="ButtonStyle.Danger" Text="Cancel" Style="width: 120px" Class="mr-1" />
+        </div>
+    </div>
+    @*<div class="row">
+        <div class="col-md-12 text-right">
+            <button class="btn btn-secondary emp_mark_btn" @onclick="AddEmployeeAttendance">Save</button>
+
+        </div>
+    </div>*@
+
+</div>
+
+
+
+@inject Radzen.DialogService dialogService
+@inject NotificationHelper NotifyHelper
+@inject EmployeeAttendanceManageService _service;
+
+
+@code {
+    [Parameter] public string EmployeeAttendenceID { get; set; }
+
+    private EmployeeAttendenceView employeeAttendence = new EmployeeAttendenceView();
+
+    private List<EmployeeAttendenceView> employeeAttendences;
+
+    private List<EmployeeView> employees;
+
+    private DateTime CheckIn = DateTime.UtcNow, CheckOut = DateTime.UtcNow, CheckInTIme, CheckOutTime;
+
+
+
+    protected override void OnInitialized()
+    {
+        if (EmployeeAttendenceID != "0")
+        {
+            employeeAttendence = _service.GetById(Convert.ToInt32(EmployeeAttendenceID));
+
+            if (employeeAttendence == null)
+            {
+                // Error Message
+            }
+
+        }
+
+        employees = _service.GetEmployees();
+    }       
+
+    async Task CreateEmployeeAttendance()
+    {
+        try
+        {
+            if (employeeAttendence.CheckIn != null)
+            {
+                employeeAttendence.AttendanceDate = employeeAttendence.CheckIn.Value.Date;
+            }
+
+            if (EmployeeAttendenceID != "0")
+            {
+                employeeAttendence = await _service.UpdateEmployeeAttendence(employeeAttendence);
+            }
+            else
+            {
+                employeeAttendence = await _service.AddEmployeeAttendence(employeeAttendence);
+            }
+
+            if (employeeAttendence.EmployeeAttendenceID != 0)
+            {
+                NotifyHelper.Message(NotificationSeverity.Success, "Employee Attendance", "Employee Attendance Successfully Marked.");
+                dialogService.Close(employeeAttendence);
+            }
+            else
+            {
+                NotifyHelper.Message(NotificationSeverity.Error, "Employee Attendance", "Error While Saving Employee Attendance.");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotifyHelper.Message(NotificationSeverity.Error, "Employee Attendance", "Error While Saving Employee Attendance.");
+        }
+
+    }
+
+}

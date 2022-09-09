@@ -1,0 +1,83 @@
+﻿@page "/EditCategory/{Id}"
+@using ACS.Data
+@using ACS.ViewModels
+@using ACS.Models
+@inject CategoryManagerService _service
+@inject NavigationManager _navMan
+
+<section class="bill-details">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <div class="bill-heading">
+                        <h2>Edit Category</h2>
+                    </div>
+                </div>
+
+            </div>
+            <div class="top_bott">
+                <div class="row">
+    <div class="col-md-7">
+        <div class="widget h-100 master_cat" style="background-color:#ccc;">
+            
+            
+            <input type="hidden" @bind-value="category.CategoryID" />
+                             <div class="mb-3">
+            @*    <div class='e-btn-group custom-rbt-group'>
+                 <input type="radio" id="radioleft" name="Type" value="Expense" />
+                 <label class="e-btn" for="radioleft">Expense</label>
+                 <input type="radio" id="radiomiddle" name="Type" value="Income"/>
+                 <label class="e-btn" for="radiomiddle">Income</label>
+    
+                </div>*@
+             <RadzenRadioButtonList @bind-Value=@category.Type TValue="CategoryType">
+                 <Items>
+                     @foreach (CategoryType cat in (CategoryType[]) Enum.GetValues(typeof(CategoryType)))
+                     {
+                        <RadzenRadioButtonListItem Text="@cat.ToString()" Value="cat" />
+                     }
+
+                    </Items>
+             </RadzenRadioButtonList>
+            <div class="col-md-3 cat_div">
+            <input type="text" class="form-control trans_inp" placeholder="Category" @bind=category.CategoryName/>
+            </div>  
+            
+
+            </div>
+          <button type="submit" @onclick="UpdateCategory" class="btn btn-primary">Save</button>
+     
+        </div>
+       
+    </div>
+    <div class="col-md-5">
+        <div class="widget h-100 d-flex justify-content-center align-items-center master_cat" style="background-color:#ccc;">
+            <i class="fa-solid fa-shapes fa-2xl"></i>
+        </div>
+    </div>
+</div>
+            </div>
+        </div>
+
+    </section>
+@code {
+    [Parameter]
+    public string Id { get; set; }
+    private CategoryView category { get; set; }
+    private List<CategoryView> categories; 
+    protected override Task OnInitializedAsync()
+    {
+
+        category = _service.GetById(Convert.ToInt32(Id));
+        return base.OnInitializedAsync();
+    }
+
+    async Task UpdateCategory()
+    {
+        category =await _service.UpdateCategory(category);
+        _navMan.NavigateTo("/Category",true);
+        
+    }
+    
+}
+

@@ -1,0 +1,92 @@
+﻿@using ACS.Data;
+@using ACS.ViewModels;
+@page "/Item"
+@inject ItemManagerService _service;
+@inject Radzen.DialogService dialogService
+
+@code {
+
+    private ItemView item = new ItemView();
+    private List<ItemView> items;
+
+    protected override void OnInitialized()
+    {
+        items = _service.GetAllItems();
+
+    }
+    async Task OpenAddNewItemModel(int itemID)
+    {
+        var item = await dialogService.OpenAsync<AddItemComponent>($"",
+        new Dictionary<string, object>()
+        {
+            { "itemID", itemID + "" }
+        },
+        new DialogOptions() { ShowTitle = false, Width = "700px", Resizable = true, Draggable = true });
+        items = _service.GetAllItems();
+    }
+
+
+
+    async Task DeleteItem(int id)
+    {
+        var resp = await dialogService.Confirm("are you sure you want to delete this Item?", "Delete Item", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+        if (resp == true)
+        {
+            if (await _service.DeleteItem(id))
+            {
+                items.Remove(items.FirstOrDefault(x => x.ItemID == id));
+            }
+        }
+    }
+}
+
+
+<div class="content-page">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="d-flex flex-wrap flex-wrap align-items-center justify-content-between mb-4">
+                    <div>
+                        <h4 class="mb-3">Item List</h4>
+                    </div>
+                    <button @onclick="(async ()=> await OpenAddNewItemModel(0))" class="btn btn-primary add-list"><i class="las la-plus mr-3"></i>Add Item</button>
+                </div>
+            </div>
+            <div class="col-lg-12">
+                <div class="table-responsive rounded mb-3">
+                    <table class="data-table table mb-0 tbl-server-info">
+                        <thead class="bg-white text-uppercase">
+                            <tr class="ligth ligth-data">
+
+                                <th>Item Name</th>
+                                <th>Description</th>
+
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="ligth-body">
+
+                            @if (items?.Count > 0)
+                            {
+                                @foreach (var item in items)
+                                {
+                                    <tr>
+
+                                        <td>@item.ItemName</td>
+                                        <td>@item.Description</td> 
+                                        <td>
+                                            <div class="d-flex align-items-center list-action">
+                                                <button class="badge bg-success mr-2" data-toggle="tooltip" data-placement="top" title="" data-original-title="Edit" @onclick="(async ()=> await OpenAddNewItemModel(item.ItemID))"><i class="ri-pencil-line mr-0"></i></button>
+                                                <a class="badge bg-warning mr-2" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete" @onclick="() => DeleteItem(item.ItemID)"><i class="ri-delete-bin-line mr-0"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

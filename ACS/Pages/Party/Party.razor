@@ -1,0 +1,120 @@
+﻿@using ACS.Data;
+@using ACS.ViewModels;
+@page "/Party"
+@inject PartyManagerService _service;
+@inject Radzen.DialogService dialogService
+
+@code {
+
+    private PartyView party = new PartyView();
+    private List<PartyView> parties;
+
+    protected override void OnInitialized()
+    {
+        parties = _service.GetAllParties();
+
+    }
+    async Task OpenAddNewPartyModel(int partyID)
+    {
+        var party = await dialogService.OpenAsync<AddPartyComponent>($"",
+                new Dictionary<string, object>()
+                            {
+                     { "partyID", partyID + "" }
+                            },
+        new DialogOptions() { ShowTitle = false, Width = "700px", Resizable = true, Draggable = true });
+
+        //if (party != null)
+        //{
+        //    var exist = parties.FirstOrDefault(x => x.PartyID == party.PartyID);
+        //    if (exist != null)
+        //    {
+        //        parties.Remove(exist);
+        //    }
+        //    parties.Add(party);
+        //}
+        parties = _service.GetAllParties();
+    }
+
+
+    async Task DeleteParty(int id)
+    {
+        var resp = await dialogService.Confirm("are you sure you want to delete this Party?", "Delete Party", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+        if (await _service.DeleteParty(id))
+        
+            if(resp==true)
+            {
+                {
+            //Success
+            parties.Remove(parties.FirstOrDefault(x => x.PartyID == id));
+        }
+        }
+
+    }
+}
+
+
+<div class="content-page">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="d-flex flex-wrap flex-wrap align-items-center justify-content-between mb-4">
+                    <div>
+                        <h4 class="mb-3">Party List</h4>
+                    </div>
+                    <button @onclick="(async ()=> await OpenAddNewPartyModel(0))" class="btn btn-primary add-list"><i class="las la-plus mr-3"></i>Add Party</button>
+                </div>
+            </div>
+            <div class="col-lg-12">
+                <div class="table-responsive rounded mb-3">
+                    <table class="data-table table mb-0 tbl-server-info">
+                        <thead class="bg-white text-uppercase">
+                            <tr class="ligth ligth-data">
+
+                                <th>Party Name</th>
+                                <th>Address</th>
+                                <th>Contact</th>
+                                <th>Email</th>
+                               
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="ligth-body">
+
+                            @if (parties?.Count > 0)
+                            {
+                                @foreach (var party in parties)
+                                {
+                                    <tr>
+                                        
+                                        <td>@party.PartyName</td>
+                                        <td>@party.Address</td>
+                                        <td>@party.Contact</td>
+                                        <td>@party.Email</td>
+                                        
+                                        
+
+                                        <td>
+                                            <div class="d-flex align-items-center list-action">
+                                                @*<a class="badge badge-info mr-2" data-toggle="tooltip" data-placement="top" title="" data-original-title="View" href="#"><i class="ri-eye-line mr-0"></i></a>*@
+                                                <button class="badge bg-success mr-2" data-toggle="tooltip" data-placement="top" title="" data-original-title="Edit" @onclick="(async ()=> await OpenAddNewPartyModel(party.PartyID))"><i class="ri-pencil-line mr-0"></i></button>
+                                                <a class="badge bg-warning mr-2" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete" @onclick="() => DeleteParty(party.PartyID)"><i class="ri-delete-bin-line mr-0"></i></a>
+                                            </div>
+                                        </td>
+
+                                        @*<td><a class="btn btn-warning" href="/EditEmployee/@emp.EmployeeID">Edit</a></td>
+                                <td><a class="btn btn-danger" @onclick="() => DeleteEmployee(emp.EmployeeID)">Delete</a></td>*@
+                                    </tr>
+                                }
+                            }
+
+
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- Page end  -->
+    </div>
+   
+</div>

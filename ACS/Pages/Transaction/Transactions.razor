@@ -1,0 +1,122 @@
+﻿@using ACS.Data;
+@using ACS.ViewModels;
+@page "/Transactions"
+@inject TransactionManagerService _service;
+@inject Radzen.DialogService dialogService
+
+@code {
+
+    private TransactionView tran = new TransactionView();
+    private List<TransactionView> Trans;
+
+    protected override void OnInitialized()
+    {
+        Trans = _service.GetAllTransactions();
+
+    }
+    async Task OpenAddNewTransactionModel(int TransactionID)
+    {
+        var party = await dialogService.OpenAsync<AddTransactionComponent>($"",
+                new Dictionary<string, object>()
+                                    {
+                     { "TransactionID", TransactionID + "" }
+                                    },
+        new DialogOptions() { ShowTitle = false, Width = "700px", Resizable = true, Draggable = true });
+
+        //if (party != null)
+        //{
+        //    var exist = Trans.FirstOrDefault(x => x.TransactionID == TransactionID);
+        //    if (exist != null)
+        //    {
+        //        Trans.Remove(exist);
+        //    }
+        //    Trans.Add(party);
+        //}
+
+        Trans = _service.GetAllTransactions();
+
+    }
+
+
+    async Task DeleteTransaction(int id)
+    {
+        var resp = await dialogService.Confirm("Are you sure you want to delete this Transaction?", "Delete Transaction", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+        if (resp == true)
+        {
+
+            if (await _service.DeleteTransaction(id))
+            {
+                //Success
+                Trans.Remove(Trans.FirstOrDefault(x => x.TransactionID == id));
+            }
+        }
+    }
+}
+
+
+<div class="content-page">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="d-flex flex-wrap flex-wrap align-items-center justify-content-between mb-4">
+                    <div>
+                        <h4 class="mb-3">Transaction List</h4>
+                    </div>
+                    <button @onclick="(async ()=> await OpenAddNewTransactionModel(0))" class="btn btn-primary add-list"><i class="las la-plus mr-3"></i>Add Transaction</button>
+                </div>
+            </div>
+            <div class="col-lg-12">
+                <div class="table-responsive rounded mb-3">
+                    <table class="data-table table mb-0 tbl-server-info">
+                        <thead class="bg-white text-uppercase">
+                            <tr class="ligth ligth-data">
+                                <th>Date/Time</th>
+                                <th>Category </th>
+                                <th>Amount</th>
+                                <th>Note</th>
+
+
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="ligth-body">
+
+                            @if (Trans?.Count > 0)
+                            {
+                                @foreach (var Tran in Trans)
+                                {
+                                    <tr>
+                                        <td>@Tran.Date</td>
+                                        <td>@Tran.Category.CategoryName</td>
+                                        <td>@Tran.Amount</td>
+                                        <td>@Tran.Note</td>
+
+
+
+
+                                        <td>
+                                            <div class="d-flex align-items-center list-action">
+                                                @*<a class="badge badge-info mr-2" data-toggle="tooltip" data-placement="top" title="" data-original-title="View" href="#"><i class="ri-eye-line mr-0"></i></a>*@
+                                                <button class="badge bg-success mr-2" data-toggle="tooltip" data-placement="top" title="" data-original-title="Edit" @onclick="(async ()=> await OpenAddNewTransactionModel(Tran.TransactionID))"><i class="ri-pencil-line mr-0"></i></button>
+                                                <a class="badge bg-warning mr-2" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete" @onclick="() => DeleteTransaction(Tran.TransactionID)"><i class="ri-delete-bin-line mr-0"></i></a>
+                                            </div>
+                                        </td>
+
+                                        @*<td><a class="btn btn-warning" href="/EditEmployee/@emp.EmployeeID">Edit</a></td>
+                                <td><a class="btn btn-danger" @onclick="() => DeleteEmployee(emp.EmployeeID)">Delete</a></td>*@
+                                    </tr>
+                                }
+                            }
+
+
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- Page end  -->
+    </div>
+    <!-- Modal Edit -->
+
+</div>

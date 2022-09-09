@@ -1,0 +1,172 @@
+﻿@page "/AddShipmentDetailsComponent/{ShipmentDetailsID}"
+@using ACS.Data
+@using ACS.Helpers
+@using ACS.ViewModels
+
+
+
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="bill-heading">
+            <h2>Shipment Details </h2>
+            <hr />
+        </div>
+    </div>
+
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+
+        <div class="form-group">
+            <label>Shipment No *</label>
+            <input type="text" class="form-control" placeholder="Shipment No" data-errors="Please Enter Shipment No ." required @bind-value="Model.ShipmentNo">
+            <div class="help-block with-errors"></div>
+        </div>
+    </div>
+
+
+    <div class="col-md-6">
+
+        <div class="form-group">
+            <label>Shipline *</label>
+            <input type="text" class="form-control" placeholder="Shipline" data-errors="Please Enter Shipline" required @bind-value="Model.Shipline">
+            <div class="help-block with-errors"></div>
+        </div>
+    </div>
+
+
+   
+
+</div>
+
+<div class="row">
+
+    
+
+    <div class="col-md-6">
+
+        <div class="form-group">
+            <label>Vechicle No  *</label>
+            <input type="text" class="form-control" placeholder="Vehicle No" data-errors="Please Enter Vechicle No ." required @bind-value="Model.VehicleNo">
+            <div class="help-block with-errors"></div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="form-group">
+            <label>Destination *</label>
+            <input type="text" class="form-control" placeholder="Destination" data-errors="Please Enter Destination." required @bind-value="Model.Destination">
+            <div class="help-block with-errors"></div>
+        </div>
+
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label>Party *</label>
+            <RadzenDropDown AllowClear="true" TValue="int" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true" Class="w-100"
+                            @bind-Value=Model.PartyID Placeholder="Party" Data=@Party TextProperty="PartyName" ValueProperty="PartyID" />
+            <div class="help-block with-errors"></div>
+        </div>
+
+    </div>
+
+   
+            <div class="col-md-6">
+        <div class="form-group">
+            <label>Amount *</label>
+            <input type="number" class="form-control" placeholder="Amount" data-errors="Please Enter Amount." required @bind-value="Model.Amount">
+            <div class="help-block with-errors"></div>
+        </div>
+
+    </div>
+    </div>
+
+    <div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label>Amount Received *</label>
+            <input type="number" class="form-control" placeholder="Amount Received" data-errors="Please Enter Received Amount Received" required @bind-value="Model.AmountReceived">
+            <div class="help-block with-errors"></div>
+        </div>
+
+    </div>
+
+   
+         
+    </div>
+
+
+
+
+<div class="row">
+    <div class="col-md-12 text-right">
+        <RadzenButton Click="@Create" Text="Save" Style="width: 120px" ButtonStyle="ButtonStyle.Secondary" />
+        <RadzenButton Click="@((args) => dialogService.Close(null))" ButtonStyle="ButtonStyle.Danger" Text="Cancel" Style="width: 120px" Class="mr-1" />
+    </div>
+</div>
+
+
+@inject ShipmentDetailsManagerService _service;
+
+@inject Radzen.DialogService dialogService
+@inject NotificationHelper NotifyHelper
+
+@code {
+    private string _Title = "Shipment";
+
+
+    [Parameter] public string ShipmentDetailsID { get; set; }
+    private ShipmentDetailsView Model = new ShipmentDetailsView() { Date = DateTime.UtcNow.AddHours(5) };
+
+    public List<PartyView> Party;
+    protected override void OnInitialized()
+    {
+        Party = _service.GetAllParties();
+        if (ShipmentDetailsID != "0")
+        {
+            Model = _service.GetById(Convert.ToInt32(ShipmentDetailsID));
+
+            if (Model == null)
+            {
+                // Error Message
+            }
+
+        }
+    }
+
+    async Task Create()
+    {
+        try
+        {
+            if (ShipmentDetailsID != "0")
+            {
+                Model = await _service.UpdateShipmentDetail(Model);
+            }
+            else
+            {
+                Model = await _service.AddShipmentDetail(Model);
+            }
+
+            if (Model.ShipmentDetailsID != 0)
+            {
+                NotifyHelper.Message(NotificationSeverity.Success, _Title, $"{_Title} Successfully Added.");
+                dialogService.Close(Model);
+            }
+            else
+            {
+                NotifyHelper.Message(NotificationSeverity.Error, _Title, $"Error While Saving {_Title}.");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotifyHelper.Message(NotificationSeverity.Error, _Title, $"Error While Saving {_Title}.");
+        }
+
+    }
+}
+
+

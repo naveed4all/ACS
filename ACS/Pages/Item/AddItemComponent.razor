@@ -1,0 +1,101 @@
+﻿@page "/Item/{itemID}"
+@using ACS.Data
+@using ACS.Helpers
+@using ACS.ViewModels
+
+
+
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="bill-heading">
+            <h2>@_Title</h2>
+            <hr />
+        </div>
+    </div>
+
+</div>
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="form-group">
+            <label>Item Name *</label>
+            <input type="text" class="form-control" placeholder="Item Name" data-errors="Please Enter Name." required @bind-value=Model.ItemName>
+            <div class="help-block with-errors"></div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="form-group">
+            <label>Description *</label>
+            <input type="text" class="form-control" placeholder="Description" data-errors="Please Enter Description." required @bind-value=Model.Description>
+            <div class="help-block with-errors"></div>
+        </div>
+
+    </div>
+  
+</div>
+<div class="row">
+    <div class="col-md-12 text-right">
+        <RadzenButton Click="@Create" Text="Save" Style="width: 120px" ButtonStyle="ButtonStyle.Secondary" />
+        <RadzenButton Click="@((args) => dialogService.Close(null))" ButtonStyle="ButtonStyle.Danger" Text="Cancel" Style="width: 120px" Class="mr-1" />
+    </div>
+</div>
+
+
+@inject ItemManagerService _service;
+
+@inject Radzen.DialogService dialogService
+@inject NotificationHelper NotifyHelper
+
+@code {
+    private string _Title = "Item";
+    
+
+    [Parameter] public string ItemID { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (ItemID != "0")
+        {
+            Model = _service.GetByID(Convert.ToInt32(ItemID));
+
+            if (Model == null)
+            {
+                // Error Message
+            }
+
+        }
+    }
+
+    private ItemView Model = new ItemView();
+    async Task Create()
+    {
+        try
+        {
+            if (ItemID != "0")
+            {
+                Model = await _service.UpdateItem(Model);
+            }
+            else
+            {
+                Model = await _service.AddItem(Model);
+            }
+
+            if (Model.ItemID != 0)
+            {
+                NotifyHelper.Message(NotificationSeverity.Success, _Title, $"Item Successfully {_Title}.");
+                dialogService.Close(Model);
+            }
+            else
+            {
+                NotifyHelper.Message(NotificationSeverity.Error, _Title, $"Error While Saving {_Title}.");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotifyHelper.Message(NotificationSeverity.Error, _Title, $"Error While Saving {_Title}.");
+        }
+
+    }
+}
+

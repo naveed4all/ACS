@@ -1,0 +1,117 @@
+﻿@page "/Employee/{EmpID}"
+@using ACS.Data
+@using ACS.Helpers
+@using ACS.ViewModels
+
+
+
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="bill-heading">
+            <h2>Employee</h2>
+            <hr />
+        </div>
+    </div>
+
+</div>
+<div class="row">
+    <div class="col-md-6">
+
+        <div class="form-group">
+            <label>Employee No *</label>
+            <input type="text" class="form-control" placeholder="Employee No" data-errors="Please Employee No." required @bind-value=employee.EmployeeNo>
+            <div class="help-block with-errors"></div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label>Employee Name *</label>
+            <input type="text" class="form-control" placeholder="Employee Name" data-errors="Please Employee Name." required @bind-value=employee.EmployeeName>
+            <div class="help-block with-errors"></div>
+        </div>
+
+    </div>
+    <div class="col-md-6">
+
+        <div class="form-group">
+            <label>Contact Number *</label>
+            <input type="text" class="form-control" placeholder="Contact Number" data-errors="Please Contact Number." required @bind-value=employee.Contact>
+            <div class="help-block with-errors"></div>
+        </div>
+    </div>
+    <div class="col-md-6">
+
+        <div class="form-group">
+            <label>Salary *</label>
+            <input type="text" class="form-control" placeholder="Contact Number" data-errors="Please Salary." required @bind-value=employee.Salary>
+            <div class="help-block with-errors"></div>
+        </div>
+
+    </div>
+    <div class="col-md-12">
+        <input type="checkbox" @bind=employee.IsPermenant /> Is Permenant
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 text-right">
+        <RadzenButton Click="@CreateEmployee" Text="Save" Style="width: 120px" ButtonStyle="ButtonStyle.Secondary" />
+        <RadzenButton Click="@((args) => dialogService.Close(null))" ButtonStyle="ButtonStyle.Danger" Text="Cancel" Style="width: 120px" Class="mr-1" />
+    </div>
+</div>
+
+
+@inject Radzen.DialogService dialogService
+@inject EmployeeManagerService _service;
+@inject NotificationHelper NotifyHelper
+
+
+@code {
+
+    [Parameter] public string EmpID { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (EmpID != "0")
+        {
+            employee = _service.GetById(Convert.ToInt32(EmpID));
+
+            if (employee == null)
+            {
+                // Error Message
+            }
+
+        }
+    }
+
+    private EmployeeView employee = new EmployeeView();
+    async Task CreateEmployee()
+    {
+        try
+        {
+            if (EmpID != "0")
+            {
+                employee = await _service.UpdateEmployee(employee);
+            }
+            else
+            {
+                employee = await _service.AddEmployee(employee);
+            }
+
+            if (employee.EmployeeID != 0)
+            {
+                NotifyHelper.Message(NotificationSeverity.Success, "Employee", "Employee Successfully Saved.");
+                dialogService.Close(employee);
+            }
+            else
+            {
+                NotifyHelper.Message(NotificationSeverity.Error, "Employee", "Error While Saving Employee.");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotifyHelper.Message(NotificationSeverity.Error, "Employee", "Error While Saving Employee.");
+        }
+
+    }
+}

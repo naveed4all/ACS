@@ -1,0 +1,80 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+@namespace ACS.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html lang="en">
+@*<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="~/" />
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link href="css/site.css" rel="stylesheet" />
+    <link href="ACS.styles.css" rel="stylesheet" />
+    <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
+</head>*@
+
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    @*<link href="css/site.css" rel="stylesheet" />*@
+    <link href="ACS.styles.css" rel="stylesheet" />
+    <!-- Bootstrap CSS -->
+    <link href="~/css/animate.css" rel="stylesheet" >
+    <link href="~/fontawesome5/css/all.min.css" rel="stylesheet">
+    <link href="~/slick/slick-theme.css" rel="stylesheet" type="text/css" >
+    <link href="~/slick/slick.css" rel="stylesheet" type="text/css" >
+    <link href="~/css/slicknav.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="~/css/jquery.fancybox.min.css">
+    <link href="~/css/bootstrap.css" rel="stylesheet">
+    <link href="~/css/custom.css" rel="stylesheet" >
+    @*<link href="~/css/responsive.css" rel="stylesheet" >*@
+    <link href="_content/Radzen.Blazor/css/default-base.css" rel="stylesheet">
+    <title>Afsar Cold Storage</title>
+  </head>
+<body>
+
+     
+
+
+    @RenderBody()
+
+@*    <div id="blazor-error-ui">
+        <environment include="Staging,Production">
+            An error has occurred. This application may no longer respond until reloaded.
+        </environment>
+        <environment include="Development">
+            An unhandled exception has occurred. See browser dev tools for details.
+        </environment>
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>*@
+
+    <script src="_framework/blazor.server.js"></script>
+
+    <script src="~/js/jquery-3.6.0.min.js"></script>
+    <script src="~/js/wow.js"></script>
+    @*<script src="~/slick/slicknavk.js"></script>*@
+    <script src="~/slick/slick.min.js"></script>
+    <script src="~/js/jquery.slicknav.js"></script>
+    <script src="~/js/jquery.fancybox.min.js"></script>
+    <script src="~/js/bootstrap.js"></script>
+    <script src="~/js/custom.js"></script>
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
+
+    <script>
+      function openNav() {
+      document.getElementById("mySidenav").style.width = "250px";
+      }
+
+      //$(document).ready(function openNav() {
+      //    $(document).getElementById("mySidenav").style.width = "250px";
+      //  });
+
+      function closeNav() {
+          document.getElementById("mySidenav").style.width = "0";
+      }
+  </script>
+</body>
+</html>

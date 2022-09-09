@@ -1,0 +1,51 @@
+﻿@page "/EditSize/{Id}"
+@using ACS.Data
+@using ACS.ViewModels
+@inject SizeManagerService _service
+@inject NavigationManager _navMan
+
+<EditForm Model="size">  
+    <div class="container">
+     <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <div class="bill-heading">
+                        <h2>Edit Item</h2>
+                    </div>
+                </div>
+
+            </div>
+        <div class="row employee_input">
+
+                <input type="hidden" class="form-control" @bind-value=size.SizeID/>
+            
+            
+            <div class="col-md-3">
+            <input type="text" class="form-control" @bind-value=size.Name />
+            </div>
+
+            
+
+            
+        </div>
+        <div style="display: flex;width: auto;justify-content: flex-end;"><button class="btn btn-primary emp_btn" @onclick="UpdateSize">Save</button></div>
+      </div>
+</EditForm>
+@code {
+    [Parameter]
+    public string Id { get; set; }
+    private SizeView size { get; set; }
+    private List<SizeView> sizes; 
+    protected override Task OnInitializedAsync()
+    {
+
+        size = _service.GetById(int.Parse(Id));
+        return base.OnInitializedAsync();
+    }
+
+    async Task UpdateSize()
+    {
+        size =await _service.UpdateSize(size);
+        _navMan.NavigateTo("/Size");
+
+    }
+}

@@ -1,0 +1,123 @@
+﻿@page "/Note/{NoteID}"
+@using ACS.Data
+@using ACS.Helpers
+@using ACS.ViewModels
+
+
+
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="bill-heading">
+            <h2>@_Title</h2>
+            <hr />
+        </div>
+    </div>
+
+</div>
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="form-group">
+            <label> Note Description *</label>
+            <input type="text" class="form-control" placeholder=" Description" data-errors="Please Enter Description." required @bind-value=Model.NoteDescription>
+            <div class="help-block with-errors"></div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="form-group">
+            @* <label>Category Type *</label>
+            <input type="text" class="form-control" placeholder="Category Type" data-errors="Please Enter Type." required @bind-value=Model.Type>*@
+            @* <div class='e-btn-group custom-rbt-group'>
+            <input type="radio" id="radioleft" name="Type" value="Expense" />
+            <label class="e-btn" for="radioleft">Expense</label>
+            <input type="radio" id="radiomiddle" name="Type" value="Income" />
+            <label class="e-btn" for="radiomiddle">Income</label>
+
+            </div>*@
+           @* <RadzenRadioButtonList @bind-Value=@Model.Type TValue="CategoryType">
+                <Items>
+                    @foreach (CategoryType cat in (CategoryType[])Enum.GetValues(typeof(CategoryType)))
+                    {
+                        <RadzenRadioButtonListItem Text="@cat.ToString()" Value="cat" />
+                    }
+
+                </Items>
+            </RadzenRadioButtonList>*@
+            <div class="help-block with-errors"></div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="row">
+    <div class="col-md-12 text-right">
+        <RadzenButton Click="@Create" Text="Save" Style="width: 120px" ButtonStyle="ButtonStyle.Secondary" />
+        <RadzenButton Click="@((args) => dialogService.Close(null))" ButtonStyle="ButtonStyle.Danger" Text="Cancel" Style="width: 120px" Class="mr-1" />
+    </div>
+</div>
+
+
+@inject NotesManagerService _services;
+
+@inject Radzen.DialogService dialogService
+@inject NotificationHelper NotifyHelper
+
+
+@code {
+    private string _Title = "Note";
+
+
+    [Parameter] public string NoteID { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (NoteID != "0")
+        {
+            Model = _services.GetById(Convert.ToInt32(NoteID));
+
+            if (Model == null)
+            {
+                // Error Message
+            }
+
+        }
+    }
+
+    private NoteView Model = new NoteView();
+    async Task Create()
+    {
+        try
+        {
+            if (NoteID != "0")
+            {
+                Model = await _services.UpdateNote(Model);
+            }
+            else
+            {
+                Model = await _services.AddNote(Model);
+            }
+
+            if (Model.NoteID != 0)
+            {
+                NotifyHelper.Message(NotificationSeverity.Success, _Title, $"{_Title} Successfully Added.");
+                dialogService.Close(Model);
+            }
+            else
+            {
+                NotifyHelper.Message(NotificationSeverity.Error, _Title, $"Error While Saving {_Title}.");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotifyHelper.Message(NotificationSeverity.Error, _Title, $"Error While Saving {_Title}.");
+        }
+
+
+
+    }
+}
+
+

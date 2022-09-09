@@ -1,0 +1,309 @@
+﻿@page "/GenerateBill"
+@using ACS.Data
+@using ACS.ViewModels
+@using System.ComponentModel.DataAnnotations
+@using System.Text.RegularExpressions
+@inject StockOutManagerService _service
+@inject DialogService DialogService
+
+
+
+
+@code {
+    private InventoryView inven = new InventoryView();
+    private List<StockOutView> stockOuts = new List<StockOutView>();
+    private List<PartyView> partyList = new List<PartyView>();
+    private int ReceivedByPartyID { get; set; }
+    private StockOutView stockOutEntry = new StockOutView();
+    private InvoiceView invoiceEntry = new InvoiceView() { Date = DateTime.UtcNow.AddHours(5) };
+    private int grNO;
+    public int propGr
+    {
+        get { return grNO; }
+        set
+        {
+            grNO = value;
+            getInventoryDetails(grNO.ToString());
+        }
+    }
+    protected override void OnInitialized()
+    {
+        partyList = _service.getParties();
+    }
+
+    void getInventoryDetails(string gr)
+    {
+        if (gr != "" && Regex.IsMatch(gr, "[0-9]*$"))
+        {
+            var GRNo = Convert.ToInt32(gr);
+            if (GRNo > 0)
+            {
+                inven = _service.getInventoryDetailsByGRNo(GRNo);
+            }
+        }
+    }
+
+    void AddStockOutTolist()
+    {
+        var check = stockOuts.FirstOrDefault(x => x.GRNo == inven.GRNo);
+        if (check != null)
+        {
+            if (stockOutEntry.Qty + check.Qty <= inven.RemainingQty)
+            {
+                check.Qty = stockOutEntry.Qty + check.Qty;
+                check.Amount = _service.calculateAmount(check.Qty, inven.ReceivedDate, inven.MonthlyRent, inven.DiscountDays, inven.Discount);
+                //AddInvoice(check);
+            }
+        }
+        else
+        {
+            if (stockOutEntry.Qty <= inven.RemainingQty)
+            {
+                stockOutEntry.GRNo = inven.GRNo;
+                stockOutEntry.InventoryID = inven.InventoryID;
+                stockOutEntry.ItemID = inven.ItemID;
+                stockOutEntry.Inventory = inven;
+                stockOutEntry.ItemName = inven.Item.ItemName;
+                stockOutEntry.Inventory.Item = null;
+
+                stockOutEntry.Amount = _service.calculateAmount(stockOutEntry.Qty, inven.ReceivedDate, inven.MonthlyRent, inven.DiscountDays, inven.Discount);
+
+                stockOuts.Add(stockOutEntry);
+
+                //AddInvoice(stockOutEntry);
+            }
+        }
+
+        calculateBillTotal();
+        grNO = 0;
+        stockOutEntry = new StockOutView();
+        inven = new InventoryView();
+
+    }
+
+
+    void DeleteStockOut(int stockOutId)
+    {
+        var stock = stockOuts.FirstOrDefault(x => x.GRNo == stockOutId);
+        stockOuts.Remove(stock);
+        calculateBillTotal();
+    }
+
+    async Task GenerateStockOutBill()
+    {
+        if (stockOuts?.Count > 0)
+        {
+            if (ReceivedByPartyID > 0 && invoiceEntry.ReceivedByName != "" && invoiceEntry.ReceivedByName != null)
+            {
+                invoiceEntry.ReceivedByPartyID = ReceivedByPartyID;
+
+                invoiceEntry.StockOutRecords = stockOuts;
+                invoiceEntry = await _service.generateBill(invoiceEntry);
+                stockOuts = invoiceEntry.StockOutRecords;
+            }
+            else
+            {
+                await ShowValidation("Error", "Received by Party and Given By Party are Required");
+            }
+        }
+        else
+        {
+            await ShowValidation("Error", "Add Inventory to stock Out");
+        }
+    }
+
+    void calculateBillTotal()
+    {
+        invoiceEntry.TotalAmount = 0;
+        foreach (var item in stockOuts)
+        {
+            invoiceEntry.TotalAmount += item.Amount;
+        }
+    }
+
+    async Task ShowValidation(string head, string para)
+    {
+        var options = new DialogOptions() { CloseDialogOnOverlayClick = false };
+
+        await DialogService.OpenAsync(head, ds =>
+    @<div>
+
+        <div class="row" style="justify-content:space-between">
+            <p>@para</p>
+        </div>
+        <div class="row" style="justify-content:space-between">
+            <RadzenButton Icon="save" Text="Close" Click="() => ds.Close(false)" Style="width: 200px; background-color: #479cc8; margin:20px 12px;" />
+        </div>
+
+    </div>
+    , options);
+    }
+}
+
+<div class="content-page">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="d-flex flex-wrap flex-wrap align-items-center justify-content-between mb-4">
+                    <div>
+                        <h4 class="mb-3">Generate Bills</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12">
+                <div class="table-responsive rounded mb-3">
+                    <table class="data-table table mb-0 tbl-server-info">
+                        <thead class="bg-white text-uppercase">
+                            <tr class="ligth ligth-data">
+                                <th>Gr No</th>
+                                <th>Party</th>
+                                <th>Article</th>
+                                <th class="for-size">Descripition</th>
+                                <th>StockIn Qty.</th>
+                                <th>Remaining Qty.</th>
+                                <th>StockOut Qty.</th>
+                                <th>Amount</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody class="ligth-body">
+
+                            @if (stockOuts?.Count > 0)
+                            {
+                                foreach (var entry in stockOuts)
+                                {
+                                    <tr>
+                                        <td>
+                                            @entry.Inventory?.GRNo
+                                        </td>
+                                        <td>
+                                            @entry.Inventory?.Party?.PartyName
+                                        </td>
+                                        <td>
+                                            @entry.Inventory?.ArticleNo
+                                        </td>
+                                        <td>
+                                            @entry.Inventory?.Item?.ItemName
+                                        </td>
+                                        <td>
+                                            @entry.Inventory?.StockInQty
+                                        </td>
+                                        <td>
+                                            @entry.Inventory?.RemainingQty
+                                        </td>
+                                        <td>
+                                            @entry.Qty
+                                        </td>
+                                        <td>
+                                            @entry.Amount
+                                        </td>
+                                        <td>
+                                            <a href="#" @onclick="()=> DeleteStockOut(entry.GRNo)" class="badge bg-warning mr-2"><i class="ri-delete-bin-line mr-0"></i></a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>
+                                    <input type="number" place-holder="GR No" class="form-control-sm" @bind="propGr" required />
+                                </td>
+                                <td>
+                                    @inven?.Party?.PartyName
+                                </td>
+                                <td>
+                                    @{
+                                        string article = "";
+                                        if (inven?.ArticleNo > 0)
+                                        {
+                                            article = inven.ArticleNo.ToString();
+                                        }
+                                    }
+                                    @article
+                                </td>
+                                <td>
+                                    @inven?.Item?.ItemName
+                                </td>
+                                <td>
+                                    @inven?.StockInQty
+                                </td>
+                                <td>
+                                    @inven?.RemainingQty
+                                </td>
+                                <td>
+                                    <input type="number" place-holder="Quantity" min="1" max="@inven?.RemainingQty" required @bind-value="stockOutEntry.Qty" />
+                                </td>
+                                <td></td>
+                                <td>
+                                    <div class="button_save">
+                                        <button @onclick="AddStockOutTolist" class="btn btn-primary add-list"><i class="las la-plus mr-3"></i>Add</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>Received By</label>
+                                    <RadzenDropDown AllowClear="true" Name="ReceivedBy" TValue="int" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true" Class="w-100 selectpicker form-control"
+                                                    @bind-Value="ReceivedByPartyID" Placeholder="Received" Data=@partyList TextProperty="PartyName" ValueProperty="PartyID" />
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <label>Reciever's Name</label>
+                                    <input type="text" class="form-control" placeholder="Name" @bind-value="invoiceEntry.ReceivedByName">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>Total Amount : </label>
+                                    @invoiceEntry.TotalAmount
+                                </td>
+                                <td>
+                                    @*Is Fully Paid : <input type="checkbox" class="form-control-input" required @bind-value="invoiceEntry.IsPaid" />*@
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-control-input" required @bind-value="invoiceEntry.IsPaid" />
+                                        <label class="form-check-label">Is Fully Paid</label>
+                                    </div>
+                                </td>
+                                <td>
+                                    @{
+                                        if (invoiceEntry.IsPaid)
+                                        {
+                                            invoiceEntry.AmountPaid = invoiceEntry.TotalAmount;
+                                        }
+                                    }
+                                    <div class="row">
+                                        <label> Amount Paid :</label>
+                                        <input type="text" class="form-control-md" placeholder="Amount Paid" required @bind-value="invoiceEntry.AmountPaid">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="col-md-12">
+                                        <button @onclick="GenerateStockOutBill" class="btn btn-secondary add-list">Generate Bill</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+        <div class="row">
+
+            <RadzenDialog />
+
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <button @onclick="GenerateStockOutBill" class="btn btn-secondary add-list">Generate Bill</button>
+            </div>
+        </div>
+    </div>
+</div>

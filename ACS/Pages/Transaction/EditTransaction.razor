@@ -1,0 +1,104 @@
+﻿@page "/EditTransaction/{Id}"
+
+@using ACS.Data
+@using Radzen
+@using ACS.ViewModels
+@inject TransactionManagerService _service
+@inject NavigationManager _navMan
+
+
+
+    <section class="bill-details">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <div class="bill-heading">
+                        <h2>Edit Transaction</h2>
+                    </div>
+                </div>
+
+            </div>
+            <div class="top_bott">
+                <div class="row">
+    <div class="col-md-7">
+        <div class="widget h-100 master_cat" style="background-color:#ccc;">
+            
+            
+            <input type="hidden" @bind-value="transaction.TransactionID" />
+                <div class="mb-3">
+            @*    <div class='e-btn-group custom-rbt-group'>
+                 <input type="radio" id="radioleft" name="Type" value="Expense" />
+                 <label class="e-btn" for="radioleft">Expense</label>
+                 <input type="radio" id="radiomiddle" name="Type" value="Income"/>
+                 <label class="e-btn" for="radiomiddle">Income</label>
+    
+                </div>*@
+            <div class="row">
+            <div class="col-md-12">
+             <input type="date" class="trans_inp" placeholder="Date" @bind-value=transaction.Date>
+            </div>  
+            </div>
+
+            <div class="row">
+            <div class="col-md-12">
+               <RadzenDropDown AllowClear="true" TValue="int" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true" Class="trans_inp"
+               @bind-Value=transaction.CategoryID Placeholder="Category" Data=@categories TextProperty="CategoryName" ValueProperty="CategoryID" />
+            </div>  
+            </div>
+
+            <div class="row">
+            <div class="col-md-12">
+               <input type="text" class="trans_inp" placeholder="Amount"  @bind-value=transaction.Amount/>
+            </div>  
+            </div>
+             <div class="row">
+            <div class="col-md-12">
+                <RadzenTextArea @bind-Value=@transaction.Note Cols="8" Rows="3" class="trans_inp" />
+            </div>  
+            </div>
+
+
+            </div>
+          <button type="submit" @onclick="UpdateTransaction" class="btn btn-primary">Save</button>
+     
+        </div>
+       
+    </div>
+    <div class="col-md-5">
+        <div class="widget h-100 d-flex justify-content-center align-items-center master_cat" style="background-color:#ccc;">
+            <i class="fa-solid fa-shapes fa-2xl"></i>
+        </div>
+    </div>
+</div>
+            </div>
+        </div>
+
+    </section>
+
+
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+    private TransactionView transaction { get; set; }
+    private CategoryView category { get; set; }
+    private List<TransactionView> transactions;
+    private List<CategoryView> categories;
+
+    protected override Task OnInitializedAsync()
+    {
+        transaction = _service.GetById(int.Parse(Id));
+        //employee=_service.GetEmpById(int.Parse(Id));
+        categories = _service.GetAllCategories();
+        
+        return base.OnInitializedAsync();
+    }
+
+    async Task UpdateTransaction()
+    {
+        transaction =await _service.UpdateTransaction(transaction);
+        _navMan.NavigateTo("/Transaction");
+    }
+}
+
+

@@ -1,0 +1,308 @@
+﻿@page "/GoodReceive"
+@using ACS.Data
+@using ACS.Helpers
+@using ACS.ViewModels
+@using Radzen
+@inject GoodsReceivedService _service
+@inject DialogService DialogService
+@inject Radzen.DialogService dialogService
+
+
+<PageTitle>Good Received</PageTitle>
+@*<section class="bill-details">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-10 col-sm-10 col-xs-12">
+                <div class="bill-heading">
+                    <h2>Goods Recived Notes</h2>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-2 col-xs-12">
+
+                <div class="table-btn">
+                    <a href="javascript:void(0)" @onclick="AddItemModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add Items</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>*@
+
+
+<div class="content-page">
+    <div class="row">
+       <hr />
+    </div>
+    <div class="container-fluid add-form-list">      
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between">
+                        <div class="header-title">
+                            <h4 class="card-title">Add Product</h4>
+                        </div>                        
+                        <button @onclick="(async ()=> await AddItemModal())" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop"><i class="las la-plus mr-3"></i>Add Items</button>
+                    </div>
+                    <div class="card-body">
+                        @*  <form action="https://templates.iqonic.design/posdash/html/backend/page-list-product.html" data-toggle="validator">*@
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>GR No </label>
+                                    <input type="text" class="form-control" placeholder="@inventory.GRNo" disabled>
+                                    <div class="help-block with-errors"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Recieved Date *</label>
+                                    <input type="date" class="form-control" id="Inward Date" name="dob" placeholder="Inward Date" @bind=inventory.ReceivedDate />
+                                    <div class="help-block with-errors"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Part Name *</label>
+                                    <RadzenDropDown AllowClear="true" TValue="int" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true" Class="w-100 selectpicker form-control"
+                                                    @bind-Value=inventory.PartyID Placeholder="Party Name" Data=@parties TextProperty="PartyName" ValueProperty="PartyID" />
+                                    @*   <select name="type" class="selectpicker form-control" data-style="py-0">
+                                    </select>            *@
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Marka *</label>
+                                    <input type="text" class="form-control" placeholder="Marka Number" data-errors="Please Marka Number." required @bind=inventory.MarkOn>
+                                    <div class="help-block with-errors"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>PMarka *</label>
+                                    <input type="text" class="form-control" placeholder="PMarka" data-errors="Please PMarka." required @bind=inventory.PMarka>
+                                    <div class="help-block with-errors"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Article Number *</label>
+                                    <input type="text" class="form-control" placeholder="Article Number" data-errors="Please Article Number." required @bind=inventory.ArticleNo>
+                                    <div class="help-block with-errors"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Room Number *</label>
+                                    <input type="text" class="form-control" placeholder="Room Number" data-errors="Please Room Number." required @bind=inventory.RoomNo>
+                                    <div class="help-block with-errors"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+
+                                <div class="form-group">
+                                    <label>Rack No *</label>
+                                    <input type="text" class="form-control" placeholder="Rack Number" data-errors="Please Rack No." required @bind=inventory.RackNo>
+                                    <div class="help-block with-errors"></div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <div class="form-group">
+                                    <label>StockIn Quantity *</label>
+                                    <input type="text" class="form-control" placeholder="StockIn Quantity" data-errors="Please StockIn Quantity" required @bind=inventory.StockInQty>
+                                    <div class="help-block with-errors"></div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <div class="form-group">
+                                    <label>Discount</label>
+                                    <input type="text" class="form-control" placeholder="Discount" data-errors="Please Discount." required @bind=inventory.Discount>
+                                    <div class="help-block with-errors"></div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <div class="form-group">
+                                    <label>Discount Days</label>
+                                    <input type="text" class="form-control" placeholder="Discount Days" data-errors="Please Discount Days." required @bind=inventory.DiscountDays>
+                                    <div class="help-block with-errors"></div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <div class="form-group">
+                                    <label>Item</label>
+                                    <RadzenDropDown AllowClear="true" TValue="int" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true" Class="w-100"
+                                                    @bind-Value=inventory.ItemID Placeholder="Received" Data=@items TextProperty="ItemName" ValueProperty="ItemID" />
+                                    <div class="help-block with-errors"></div>
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Size</label>
+                                    <RadzenDropDown AllowClear="true" TValue="int" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true" Class="w-100"
+                                                    @bind-Value=inventory.SizeID Placeholder="Size" Data=@sizes TextProperty="Name" ValueProperty="SizeID" />
+                                    <div class="help-block with-errors"></div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <div class="form-group">
+                                    <label>Monthly Rent</label>
+                                    <input type="text" class="form-control" placeholder="Monthly Rent" data-errors="Please Monthly Rent." required @bind=inventory.MonthlyRent>
+                                    <div class="help-block with-errors"></div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <div class="form-group">
+                                    <label>Customer Name</label>
+                                    <input type="text" class="form-control" placeholder="Customer Name" data-errors="Please Customer Name." required @bind=inventory.CustomerName>
+                                    <div class="help-block with-errors"></div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-right">
+                                <RadzenButton Click="@CreateInventory" Text="Save" Style="width: 120px" ButtonStyle="ButtonStyle.Secondary" />
+                                <RadzenButton Click="@((args) => dialogService.Close(null))" ButtonStyle="ButtonStyle.Danger" Text="Cancel" Style="width: 120px" Class="mr-1" />
+                            </div>
+                        </div>
+
+                        @*</form>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<RadzenDialog />
+
+
+@inject NotificationHelper NotifyHelper
+
+@code {
+    private List<ItemView> items;
+    private List<PartyView> parties;
+    private List<SizeView> sizes;
+    private ItemView item = new ItemView();
+
+    private InventoryView inventory = new InventoryView() { ReceivedDate = DateTime.UtcNow.AddHours(5) };
+
+    //private int PartyName = 0;
+    private int loadCounter = 0;
+    protected override Task OnInitializedAsync()
+    {
+        inventory.GRNo = _service.getNewGRNo();
+        parties = _service.getParties();
+        sizes = _service.getSizes();
+        items = _service.getItems();
+        loadCounter++;
+
+
+        //parties = _service.GetAllParties();
+
+        return base.OnInitializedAsync();
+    }
+
+    //async Task saveGoodReceived()
+    //{
+    //    inventory.IsActive = true;
+    //    var inven = await _service.SaveGoodsReceived(inventory);
+    //    if(inven?.InventoryID > 0){
+    //        inventory = new InventoryView();
+    //        inventory.GRNo = _service.getNewGRNo();
+    //    }
+    //}
+
+    async Task CreateInventory()
+    {
+        try
+        {
+
+            inventory.IsActive = true;
+            var inven = await _service.SaveGoodsReceived(inventory);
+            if (inven?.InventoryID > 0)
+            {
+                inventory = new InventoryView();
+                inventory.GRNo = _service.getNewGRNo();
+            }
+
+            if (inventory.InventoryID != 0)
+            {
+                NotifyHelper.Message(NotificationSeverity.Success, "Good Recieved", "Good Recieved Successfully Saved.");
+                dialogService.Close(inventory);
+            }
+            else
+            {
+                NotifyHelper.Message(NotificationSeverity.Error, "Good Recieved", "Error While Saving Record.");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotifyHelper.Message(NotificationSeverity.Error, "Employee", "Error While Saving Employee.");
+        }
+
+    }
+
+    async Task AddItemModal()
+    {
+        var options = new DialogOptions() { CloseDialogOnOverlayClick = true };
+
+        await DialogService.OpenAsync("Add New Item", ds =>
+    @<div>
+        <div class="row" style="justify-content:space-between">
+            <div class="col-md-6">
+                <RadzenTextBox Placeholder="Item Name" @bind-Value=@item.ItemName Style="width: 250px;" Required />
+            </div>
+            <div class="col-md-6">
+                <RadzenTextBox Placeholder="Item Description" @bind-Value=@item.Description Style="width: 250px" />
+            </div>
+        </div>
+        <div class="row" style="justify-content:space-between">
+            <RadzenButton Icon="save" Text="Save" Click="() => AddItem(ds)" Style="width: 200px; background-color: #479cc8 margin:20px 12px;" />
+        </div>
+    </div>
+    , options);
+
+    }
+
+    async Task AddItem(DialogService ds)
+    {
+        item = await _service.CreateItem(item);
+        if (item?.ItemID > 0)
+        {
+            // Sucess
+            ds.Close(false);
+            items.Add(item);
+            item = new ItemView();
+        }
+    }
+
+   
+
+}
